@@ -1,8 +1,10 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Spinner } from 'react-bootstrap'
 import AppLayout from './components/layout/AppLayout'
+import { useAppSelector } from './store/hooks'
 
+const Login = lazy(() => import('./pages/auth/Login'))
 const Dashboard = lazy(() => import('./pages/runtime/Dashboard'))
 const DynamicPage = lazy(() => import('./pages/runtime/DynamicPage'))
 const SystemList = lazy(() => import('./pages/admin/SystemList'))
@@ -16,12 +18,27 @@ function Loading() {
   )
 }
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { token } = useAppSelector((state) => state.auth)
+  if (!token) {
+    return <Navigate to="/login" replace />
+  }
+  return <>{children}</>
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Suspense fallback={<Loading />}>
         <Routes>
-          <Route element={<AppLayout />}>
+          <Route path="/login" element={<Login />} />
+          <Route
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route path="/" element={<Dashboard />} />
             <Route path="/systems/:systemKey" element={<DynamicPage />} />
             <Route path="/admin/systems" element={<SystemList />} />
