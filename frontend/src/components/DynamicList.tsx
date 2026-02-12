@@ -36,18 +36,22 @@ export default function DynamicList({
     return map;
   }, [formConfig]);
 
-  // Build columns: prefer rich columns config, fall back to displayFields
+  // Build columns: prefer rich columns config, then displayFields, then ALL form fields
   const columns: ListColumnConfigDto[] = useMemo(() => {
     if (listConfig?.columns && listConfig.columns.length > 0) {
       return listConfig.columns;
     }
-    // Fall back: each displayField becomes a single-field column
-    return (listConfig?.displayFields || []).map((key) => ({
+    // Use displayFields if configured, otherwise fall back to all form fields
+    const keys =
+      listConfig?.displayFields && listConfig.displayFields.length > 0
+        ? listConfig.displayFields
+        : formConfig?.fields?.map((f) => f.fieldKey) || [];
+    return keys.map((key) => ({
       key,
       header: fieldMap[key]?.label || key,
-      fields: [{ fieldKey: key, renderAs: 'text' }],
+      fields: [{ fieldKey: key, renderAs: 'text' as const }],
     }));
-  }, [listConfig, fieldMap]);
+  }, [listConfig, fieldMap, formConfig]);
 
   // Collect all field keys referenced by columns for search
   const allFieldKeys = useMemo(() => {

@@ -112,5 +112,48 @@ public static class DataEntryEndpoints
 
             return Results.NoContent();
         }).WithName("DeleteDataEntry").WithOpenApi();
+
+        // GET collection data (projected entries for export collections)
+        group.MapGet("/{systemKey}/{pageKey}/collections/{collectionName}", async (
+            string systemKey, string pageKey, string collectionName,
+            AppDbContext db) =>
+        {
+            // 1. Find the system config to get the collection field list
+            var system = await db.SystemConfigurations
+                .Where(s => s.SystemKey == systemKey && s.IsActive)
+                .OrderByDescending(s => s.Version)
+                .FirstOrDefaultAsync();
+
+            if (system is null)
+                return Results.NotFound(new { message = $"System '{systemKey}' not found" });
+
+            var page = system.Configuration.Pages.FirstOrDefault(p => p.PageKey == pageKey);
+            if (page is null)
+                return Results.NotFound(new { message = $"Page '{pageKey}' not found" });
+
+            var collection = page.ExportCollections.FirstOrDefault(
+                c => string.Equals(c.CollectionName, collectionName, StringComparison.OrdinalIgnoreCase));
+            if (collection is null)
+                return Results.NotFound(new { message = $"Collection '{collectionName}' not found" });
+
+            // 2. Get all data entries for this page
+            var entries = await db.DataEntries
+                .Where(e => e.SystemKey == systemKey && e.PageKey == pageKey)
+                .OrderByDescending(e => e.CreatedAt)
+                .ToListAsync();
+
+            // 3. Project only the collection fields
+            var projected = entries.Select(e =>
+            {
+                var item = new Dictionary<string, object?> { ["id"] = e.Id };
+                foreach (var field in collection.Fields)
+                {
+                    item[field] = e.Data.TryGetValue(field, out var val) ? val : null;
+                }
+                return item;
+            });
+
+            return Results.Ok(projected);
+        }).WithName("GetCollectionData").WithOpenApi();
     }
 }

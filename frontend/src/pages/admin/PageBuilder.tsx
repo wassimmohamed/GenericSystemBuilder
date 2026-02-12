@@ -265,22 +265,30 @@ export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>Display Fields</Form.Label>
-                  <Form.Select
-                    multiple
-                    value={config.list?.displayFields || []}
-                    onChange={(e) =>
-                      handleListChange(
-                        'displayFields',
-                        Array.from(e.target.selectedOptions, (o) => o.value)
-                      )
-                    }
-                  >
-                    {fieldKeys.map((k) => (
-                      <option key={k} value={k}>
-                        {k}
-                      </option>
-                    ))}
-                  </Form.Select>
+                  <div className="border rounded p-2" style={{ maxHeight: 200, overflowY: 'auto' }}>
+                    {fieldKeys.length === 0 ? (
+                      <span className="text-muted">Add form fields first</span>
+                    ) : (
+                      fieldKeys.map((k) => (
+                        <Form.Check
+                          key={k}
+                          type="checkbox"
+                          label={config.form?.fields?.find((f) => f.fieldKey === k)?.label || k}
+                          checked={(config.list?.displayFields || []).includes(k)}
+                          onChange={(e) => {
+                            const current = config.list?.displayFields || [];
+                            const next = e.target.checked
+                              ? [...current, k]
+                              : current.filter((f) => f !== k);
+                            handleListChange('displayFields', next);
+                          }}
+                        />
+                      ))
+                    )}
+                  </div>
+                  <Form.Text className="text-muted">
+                    Leave all unchecked to automatically show all form fields in the list.
+                  </Form.Text>
                 </Form.Group>
               </Col>
               <Col md={3}>
