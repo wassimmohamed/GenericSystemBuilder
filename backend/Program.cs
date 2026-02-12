@@ -49,7 +49,7 @@ app.UseCors("AllowFrontend");
 // Map endpoints
 app.MapSystemConfigurationEndpoints();
 
-// Auto-migrate database in development
+// Auto-create database schema in development (use MigrateAsync for production with migrations)
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();

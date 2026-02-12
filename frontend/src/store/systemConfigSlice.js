@@ -71,13 +71,31 @@ const systemConfigSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+      .addCase(createSystem.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(createSystem.fulfilled, (state, action) => {
+        state.loading = false;
         state.systems.push(action.payload);
       })
+      .addCase(createSystem.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      .addCase(deleteSystem.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deleteSystem.fulfilled, (state, action) => {
+        state.loading = false;
         state.systems = state.systems.filter(
           (s) => s.systemKey !== action.payload
         );
+      })
+      .addCase(deleteSystem.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
       });
   },
 });
