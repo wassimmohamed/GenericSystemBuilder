@@ -68,6 +68,10 @@ public static class SystemConfigurationEndpoints
             IValidator<CreateSystemConfigurationDto> validator,
             AppDbContext db) =>
         {
+            try
+            {
+
+            
             var validationResult = await validator.ValidateAsync(dto);
             if (!validationResult.IsValid)
             {
@@ -94,6 +98,12 @@ public static class SystemConfigurationEndpoints
             await db.SaveChangesAsync();
 
             return Results.Created($"/api/system-configurations/{entity.SystemKey}", entity.ToResponseDto());
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }).WithName("CreateSystem").WithOpenApi();
 
         // PUT update system (creates new version)

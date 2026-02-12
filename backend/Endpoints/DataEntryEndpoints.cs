@@ -49,6 +49,10 @@ public static class DataEntryEndpoints
             string systemKey, string pageKey,
             CreateDataEntryDto dto, AppDbContext db) =>
         {
+            try
+            {
+
+            
             var entry = new DataEntry
             {
                 SystemKey = systemKey,
@@ -66,6 +70,12 @@ public static class DataEntryEndpoints
             );
 
             return Results.Created($"/api/data/{systemKey}/{pageKey}/{entry.Id}", result);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }).WithName("CreateDataEntry").WithOpenApi();
 
         // PUT update entry
