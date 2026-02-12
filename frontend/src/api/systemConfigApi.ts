@@ -7,6 +7,9 @@ import type {
   ExportCollectionDto,
   LoginRequest,
   LoginResponse,
+  DataEntryResponseDto,
+  CreateDataEntryDto,
+  UpdateDataEntryDto,
 } from '../types';
 
 export const systemConfigApi = {
@@ -48,6 +51,28 @@ export const systemConfigApi = {
     apiClient
       .get<SystemConfigurationSummaryDto[]>(`/api/system-configurations/user/${userId}/accessible`)
       .then((r) => r.data),
+};
+
+export const dataEntryApi = {
+  getAll: (systemKey: string, pageKey: string) =>
+    apiClient
+      .get<DataEntryResponseDto[]>(`/api/data/${systemKey}/${pageKey}`)
+      .then((r) => r.data),
+
+  create: (systemKey: string, pageKey: string, data: CreateDataEntryDto) =>
+    apiClient
+      .post<DataEntryResponseDto>(`/api/data/${systemKey}/${pageKey}`, data)
+      .then((r) => r.data),
+
+  update: (systemKey: string, pageKey: string, id: string, data: UpdateDataEntryDto) =>
+    apiClient
+      .put<DataEntryResponseDto>(`/api/data/${systemKey}/${pageKey}/${id}`, data)
+      .then((r) => r.data),
+
+  delete: (systemKey: string, pageKey: string, id: string) =>
+    apiClient
+      .delete(`/api/data/${systemKey}/${pageKey}/${id}`)
+      .then(() => null),
 };
 
 export const authApi = {

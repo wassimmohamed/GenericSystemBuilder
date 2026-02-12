@@ -162,3 +162,26 @@ export interface LoginResponse {
   token: string;
   expiration: string;
 }
+
+// ---- Data Entry types ----
+
+export interface DataEntryResponseDto {
+  id: string;
+  systemKey: string;
+  pageKey: string;
+  data: Record<string, any>;
+  createdAt: string;
+  createdBy: string;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
+export interface CreateDataEntryDto {
+  data: Record<string, any>;
+  createdBy?: string;
+}
+
+export interface UpdateDataEntryDto {
+  data: Record<string, any>;
+  updatedBy?: string;
+}

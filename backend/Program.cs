@@ -80,6 +80,7 @@ app.UseAuthorization();
 // Map endpoints
 app.MapAuthEndpoints();
 app.MapSystemConfigurationEndpoints();
+app.MapDataEntryEndpoints();
 
 // Auto-create database schema in development (use MigrateAsync for production with migrations)
 if (app.Environment.IsDevelopment())
