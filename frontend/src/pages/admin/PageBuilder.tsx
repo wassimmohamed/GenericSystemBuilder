@@ -11,11 +11,13 @@ import {
 import FieldBuilder from './FieldBuilder';
 import type { PageConfigDto, FieldConfigDto } from '../../types';
 
+const EMPTY_FORM = { title: '', fields: [] as FieldConfigDto[] };
+
 const EMPTY_PAGE: PageConfigDto = {
   pageKey: '',
   title: '',
   titleAr: '',
-  form: { title: '', fields: [] },
+  form: { ...EMPTY_FORM },
   list: {
     displayFields: [],
     enableSearch: true,
@@ -33,6 +35,18 @@ const EMPTY_PAGE: PageConfigDto = {
   },
 };
 
+/** Merge a page from the API with safe defaults for any null/undefined nested objects */
+function withDefaults(page: PageConfigDto): PageConfigDto {
+  return {
+    ...EMPTY_PAGE,
+    ...page,
+    form: page.form ?? EMPTY_PAGE.form,
+    list: page.list ?? EMPTY_PAGE.list,
+    exportCollections: page.exportCollections ?? [],
+    permissions: page.permissions ?? EMPTY_PAGE.permissions,
+  };
+}
+
 interface PageBuilderProps {
   page: PageConfigDto | null;
   onSave: (page: PageConfigDto) => void;
@@ -41,7 +55,7 @@ interface PageBuilderProps {
 
 export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps) {
   const isNew = !page;
-  const [config, setConfig] = useState<PageConfigDto>(page || EMPTY_PAGE);
+  const [config, setConfig] = useState<PageConfigDto>(page ? withDefaults(page) : EMPTY_PAGE);
   const [editingField, setEditingField] = useState<string | null>(null);
 
   const handleChange = (field: string, value: any) => {
@@ -64,14 +78,14 @@ export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps
 
   const handleSaveField = (fieldData: FieldConfigDto) => {
     setConfig((prev) => {
-      const fields = [...(prev.form?.fields || [])];
+      const fields = [...(prev.form?.fields ?? [])];
       const idx = fields.findIndex((f) => f.fieldKey === fieldData.fieldKey);
       if (idx >= 0) {
         fields[idx] = fieldData;
       } else {
         fields.push({ ...fieldData, order: fields.length });
       }
-      return { ...prev, form: { ...prev.form, fields } };
+      return { ...prev, form: { ...(prev.form ?? EMPTY_FORM), fields } };
     });
     setEditingField(null);
   };
@@ -80,8 +94,8 @@ export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps
     setConfig((prev) => ({
       ...prev,
       form: {
-        ...prev.form,
-        fields: prev.form.fields.filter((f) => f.fieldKey !== fieldKey),
+        ...(prev.form ?? EMPTY_FORM),
+        fields: (prev.form?.fields ?? []).filter((f) => f.fieldKey !== fieldKey),
       },
     }));
   };
@@ -90,7 +104,7 @@ export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps
     setConfig((prev) => ({
       ...prev,
       exportCollections: [
-        ...prev.exportCollections,
+        ...(prev.exportCollections ?? []),
         { collectionName: '', fields: [] },
       ],
     }));
@@ -98,7 +112,7 @@ export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps
 
   const handleCollectionChange = (idx: number, field: string, value: any) => {
     setConfig((prev) => {
-      const cols = [...prev.exportCollections];
+      const cols = [...(prev.exportCollections ?? [])];
       cols[idx] = { ...cols[idx], [field]: value };
       return { ...prev, exportCollections: cols };
     });
@@ -107,7 +121,7 @@ export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps
   const handleRemoveCollection = (idx: number) => {
     setConfig((prev) => ({
       ...prev,
-      exportCollections: prev.exportCollections.filter((_, i) => i !== idx),
+      exportCollections: (prev.exportCollections ?? []).filter((_, i) => i !== idx),
     }));
   };
 
@@ -317,10 +331,10 @@ export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps
             </Button>
           </Card.Header>
           <Card.Body>
-            {config.exportCollections.length === 0 ? (
+            {(config.exportCollections ?? []).length === 0 ? (
               <p className="text-muted">No export collections configured.</p>
             ) : (
-              config.exportCollections.map((col, idx) => (
+              (config.exportCollections ?? []).map((col, idx) => (
                 <Card key={idx} className="mb-2">
                   <Card.Body>
                     <Row>

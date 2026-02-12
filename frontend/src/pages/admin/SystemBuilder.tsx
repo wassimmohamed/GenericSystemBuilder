@@ -130,8 +130,8 @@ function SystemBuilderInner({ currentSystem, isNew, error: reduxError }: SystemB
         ).unwrap();
       }
       navigate('/admin/systems');
-    } catch (err) {
-      setSaveError(err.message || 'Failed to save system');
+    } catch (err: any) {
+      setSaveError(err?.message || 'Failed to save system');
     }
   };
 
@@ -139,7 +139,7 @@ function SystemBuilderInner({ currentSystem, isNew, error: reduxError }: SystemB
     const existingPage =
       editingPage === '__new__'
         ? null
-        : config.pages.find((p) => p.pageKey === editingPage);
+        : config.pages.find((p) => p.pageKey === editingPage) ?? null;
     return (
       <PageBuilder
         page={existingPage}
