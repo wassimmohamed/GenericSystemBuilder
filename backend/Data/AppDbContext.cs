@@ -15,6 +15,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
+    public DbSet<DataEntry> DataEntries => Set<DataEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,6 +39,28 @@ public class AppDbContext : DbContext
 
             entity.HasIndex(e => new { e.SystemKey, e.Version }).IsUnique();
             entity.HasIndex(e => e.IsActive);
+        });
+
+        modelBuilder.Entity<DataEntry>(entity =>
+        {
+            entity.ToTable("data_entries");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.SystemKey).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.PageKey).IsRequired().HasMaxLength(100);
+
+            entity.Property(e => e.Data)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, JsonOptions),
+                    v => JsonSerializer.Deserialize<Dictionary<string, object?>>(v, JsonOptions) ?? new Dictionary<string, object?>()
+                )
+                .Metadata.SetValueComparer(new ValueComparer<Dictionary<string, object?>>(
+                    (a, b) => JsonSerializer.Serialize(a, JsonOptions) == JsonSerializer.Serialize(b, JsonOptions),
+                    v => JsonSerializer.Serialize(v, JsonOptions).GetHashCode(),
+                    v => JsonSerializer.Deserialize<Dictionary<string, object?>>(JsonSerializer.Serialize(v, JsonOptions), JsonOptions)!
+                ));
+
+            entity.HasIndex(e => new { e.SystemKey, e.PageKey });
         });
     }
 }
