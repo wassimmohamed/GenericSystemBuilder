@@ -1,34 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { lazy, Suspense } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Spinner } from 'react-bootstrap'
+import AppLayout from './components/layout/AppLayout'
+
+const Dashboard = lazy(() => import('./pages/runtime/Dashboard'))
+const DynamicPage = lazy(() => import('./pages/runtime/DynamicPage'))
+const SystemList = lazy(() => import('./pages/admin/SystemList'))
+const SystemBuilder = lazy(() => import('./pages/admin/SystemBuilder'))
+
+function Loading() {
+  return (
+    <div className="d-flex justify-content-center align-items-center py-5">
+      <Spinner animation="border" />
+    </div>
+  )
+}
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <BrowserRouter>
+      <Suspense fallback={<Loading />}>
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/systems/:systemKey" element={<DynamicPage />} />
+            <Route path="/admin/systems" element={<SystemList />} />
+            <Route path="/admin/systems/new" element={<SystemBuilder />} />
+            <Route path="/admin/systems/:systemKey" element={<SystemBuilder />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   )
 }
 
