@@ -94,12 +94,11 @@ app.MapAuthEndpoints();
 app.MapSystemConfigurationEndpoints();
 app.MapDataEntryEndpoints();
 
-// Auto-create database schema in development (use MigrateAsync for production with migrations)
-if (app.Environment.IsDevelopment())
+// Apply pending EF Core migrations on startup to ensure all tables exist
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.EnsureCreatedAsync();
+    await db.Database.MigrateAsync();
 }
 
 app.Run();
