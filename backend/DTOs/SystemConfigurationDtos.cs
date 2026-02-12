@@ -95,11 +95,25 @@ public record CustomValidationRuleDto(
 
 public record ListConfigDto(
     List<string> DisplayFields,
+    List<ListColumnConfigDto>? Columns,
     bool EnableSearch,
     bool EnablePagination,
     int PageSize,
     string? DefaultSortField,
     string DefaultSortDirection
+);
+
+public record ListColumnConfigDto(
+    string Key,
+    string Header,
+    string? HeaderAr,
+    List<ListColumnFieldDto> Fields
+);
+
+public record ListColumnFieldDto(
+    string FieldKey,
+    string RenderAs,
+    string? BadgeVariant
 );
 
 public record ExportCollectionDto(string CollectionName, List<string> Fields);

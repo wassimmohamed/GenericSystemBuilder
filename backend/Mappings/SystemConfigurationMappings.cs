@@ -82,6 +82,18 @@ public static class SystemConfigurationMappings
             List = dto.List != null ? new ListConfig
             {
                 DisplayFields = dto.List.DisplayFields,
+                Columns = dto.List.Columns?.Select(c => new ListColumnConfig
+                {
+                    Key = c.Key,
+                    Header = c.Header,
+                    HeaderAr = c.HeaderAr,
+                    Fields = c.Fields.Select(f => new ListColumnField
+                    {
+                        FieldKey = f.FieldKey,
+                        RenderAs = f.RenderAs,
+                        BadgeVariant = f.BadgeVariant
+                    }).ToList()
+                }).ToList() ?? new List<ListColumnConfig>(),
                 EnableSearch = dto.List.EnableSearch,
                 EnablePagination = dto.List.EnablePagination,
                 PageSize = dto.List.PageSize,
@@ -115,6 +127,12 @@ public static class SystemConfigurationMappings
             ) : null,
             model.List != null ? new ListConfigDto(
                 model.List.DisplayFields,
+                model.List.Columns?.Count > 0 ? model.List.Columns.Select(c => new ListColumnConfigDto(
+                    c.Key,
+                    c.Header,
+                    c.HeaderAr,
+                    c.Fields.Select(f => new ListColumnFieldDto(f.FieldKey, f.RenderAs, f.BadgeVariant)).ToList()
+                )).ToList() : null,
                 model.List.EnableSearch,
                 model.List.EnablePagination,
                 model.List.PageSize,
