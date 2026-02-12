@@ -12,7 +12,8 @@ public static class SystemConfigurationEndpoints
     public static void MapSystemConfigurationEndpoints(this WebApplication app)
     {
         var group = app.MapGroup("/api/system-configurations")
-            .WithTags("System Configurations");
+            .WithTags("System Configurations")
+            .RequireAuthorization();
 
         // GET all active systems (latest versions)
         group.MapGet("/", async (AppDbContext db) =>
