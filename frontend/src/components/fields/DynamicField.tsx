@@ -1,6 +1,15 @@
 import { Form } from 'react-bootstrap';
+import type { FieldConfigDto } from '../../types';
 
-export default function DynamicField({ field, value, onChange, isEdit = false, errors = {} }) {
+interface DynamicFieldProps {
+  field: FieldConfigDto;
+  value: any;
+  onChange: (fieldKey: string, value: any) => void;
+  isEdit?: boolean;
+  errors?: Record<string, string | null>;
+}
+
+export default function DynamicField({ field, value, onChange, isEdit = false, errors = {} }: DynamicFieldProps) {
   const {
     fieldKey,
     label,
@@ -16,7 +25,7 @@ export default function DynamicField({ field, value, onChange, isEdit = false, e
   const isRequired = validation?.required;
   const error = errors[fieldKey];
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<any>) => {
     const val =
       fieldType === 'Checkbox'
         ? e.target.checked

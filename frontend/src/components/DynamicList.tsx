@@ -1,5 +1,16 @@
 import { useState, useMemo } from 'react';
 import { Table, Form, Button, Pagination } from 'react-bootstrap';
+import type { ListConfigDto, FormConfigDto } from '../types';
+
+interface DynamicListProps {
+  listConfig?: ListConfigDto;
+  formConfig?: FormConfigDto;
+  data?: Record<string, any>[];
+  onEdit?: (row: Record<string, any>) => void;
+  onDelete?: (row: Record<string, any>) => void;
+  canEdit?: boolean;
+  canDelete?: boolean;
+}
 
 export default function DynamicList({
   listConfig,
@@ -9,7 +20,7 @@ export default function DynamicList({
   onDelete,
   canEdit = false,
   canDelete = false,
-}) {
+}: DynamicListProps) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState(listConfig?.defaultSortField || '');
@@ -18,7 +29,7 @@ export default function DynamicList({
   const pageSize = listConfig?.pageSize || 10;
 
   const fieldMap = useMemo(() => {
-    const map = {};
+    const map: Record<string, any> = {};
     formConfig?.fields?.forEach((f) => {
       map[f.fieldKey] = f;
     });
@@ -61,7 +72,7 @@ export default function DynamicList({
     ? filteredData.slice((currentPage - 1) * pageSize, currentPage * pageSize)
     : filteredData;
 
-  const handleSort = (field) => {
+  const handleSort = (field: string) => {
     if (sortField === field) {
       setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
     } else {

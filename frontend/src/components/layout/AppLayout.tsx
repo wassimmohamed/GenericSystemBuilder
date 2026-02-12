@@ -2,13 +2,13 @@ import { Container } from 'react-bootstrap';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
-import { useSelector, useDispatch } from 'react-redux';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { useEffect } from 'react';
 import { fetchSystems } from '../../store/systemConfigSlice';
 
 export default function AppLayout() {
-  const dispatch = useDispatch();
-  const { systems } = useSelector((state) => state.systemConfig);
+  const dispatch = useAppDispatch();
+  const { systems } = useAppSelector((state) => state.systemConfig);
 
   useEffect(() => {
     dispatch(fetchSystems());

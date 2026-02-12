@@ -9,8 +9,9 @@ import {
   Badge,
 } from 'react-bootstrap';
 import FieldBuilder from './FieldBuilder';
+import type { PageConfigDto, FieldConfigDto } from '../../types';
 
-const EMPTY_PAGE = {
+const EMPTY_PAGE: PageConfigDto = {
   pageKey: '',
   title: '',
   titleAr: '',
@@ -32,30 +33,36 @@ const EMPTY_PAGE = {
   },
 };
 
-export default function PageBuilder({ page, onSave, onCancel }) {
-  const isNew = !page;
-  const [config, setConfig] = useState(page || EMPTY_PAGE);
-  const [editingField, setEditingField] = useState(null);
+interface PageBuilderProps {
+  page: PageConfigDto | null;
+  onSave: (page: PageConfigDto) => void;
+  onCancel: () => void;
+}
 
-  const handleChange = (field, value) => {
+export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps) {
+  const isNew = !page;
+  const [config, setConfig] = useState<PageConfigDto>(page || EMPTY_PAGE);
+  const [editingField, setEditingField] = useState<string | null>(null);
+
+  const handleChange = (field: string, value: any) => {
     setConfig((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleFormChange = (field, value) => {
+  const handleFormChange = (field: string, value: any) => {
     setConfig((prev) => ({
       ...prev,
       form: { ...prev.form, [field]: value },
     }));
   };
 
-  const handleListChange = (field, value) => {
+  const handleListChange = (field: string, value: any) => {
     setConfig((prev) => ({
       ...prev,
       list: { ...prev.list, [field]: value },
     }));
   };
 
-  const handleSaveField = (fieldData) => {
+  const handleSaveField = (fieldData: FieldConfigDto) => {
     setConfig((prev) => {
       const fields = [...(prev.form?.fields || [])];
       const idx = fields.findIndex((f) => f.fieldKey === fieldData.fieldKey);
@@ -69,7 +76,7 @@ export default function PageBuilder({ page, onSave, onCancel }) {
     setEditingField(null);
   };
 
-  const handleRemoveField = (fieldKey) => {
+  const handleRemoveField = (fieldKey: string) => {
     setConfig((prev) => ({
       ...prev,
       form: {
@@ -89,7 +96,7 @@ export default function PageBuilder({ page, onSave, onCancel }) {
     }));
   };
 
-  const handleCollectionChange = (idx, field, value) => {
+  const handleCollectionChange = (idx: number, field: string, value: any) => {
     setConfig((prev) => {
       const cols = [...prev.exportCollections];
       cols[idx] = { ...cols[idx], [field]: value };
@@ -97,14 +104,14 @@ export default function PageBuilder({ page, onSave, onCancel }) {
     });
   };
 
-  const handleRemoveCollection = (idx) => {
+  const handleRemoveCollection = (idx: number) => {
     setConfig((prev) => ({
       ...prev,
       exportCollections: prev.exportCollections.filter((_, i) => i !== idx),
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(config);
   };

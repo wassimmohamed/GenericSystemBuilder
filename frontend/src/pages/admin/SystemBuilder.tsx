@@ -11,7 +11,7 @@ import {
   ListGroup,
   Badge,
 } from 'react-bootstrap';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   fetchSystemByKey,
   createSystem,
@@ -19,8 +19,14 @@ import {
   clearCurrentSystem,
 } from '../../store/systemConfigSlice';
 import PageBuilder from './PageBuilder';
+import type {
+  SystemConfigDataDto,
+  SystemConfigurationResponseDto,
+  PageConfigDto,
+  PermissionConfigDto,
+} from '../../types';
 
-const EMPTY_SYSTEM = {
+const EMPTY_SYSTEM: SystemConfigDataDto = {
   icon: '',
   title: '',
   titleAr: '',
@@ -29,26 +35,32 @@ const EMPTY_SYSTEM = {
   permissions: [],
 };
 
-function SystemBuilderInner({ currentSystem, isNew, error: reduxError }) {
+interface SystemBuilderInnerProps {
+  currentSystem: SystemConfigurationResponseDto | null;
+  isNew: boolean;
+  error: string | null;
+}
+
+function SystemBuilderInner({ currentSystem, isNew, error: reduxError }: SystemBuilderInnerProps) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { systemKey } = useParams();
 
   const [key, setKey] = useState(
     currentSystem && !isNew ? currentSystem.systemKey : ''
   );
-  const [config, setConfig] = useState(
+  const [config, setConfig] = useState<SystemConfigDataDto>(
     currentSystem && !isNew ? currentSystem.configuration : EMPTY_SYSTEM
   );
-  const [editingPage, setEditingPage] = useState(null);
-  const [saveError, setSaveError] = useState(null);
+  const [editingPage, setEditingPage] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const handleConfigChange = (field, value) => {
+  const handleConfigChange = (field: keyof SystemConfigDataDto, value: any) => {
     setConfig((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSavePage = useCallback(
-    (pageData) => {
+    (pageData: PageConfigDto) => {
       setConfig((prev) => {
         const pages = [...prev.pages];
         const idx = pages.findIndex((p) => p.pageKey === pageData.pageKey);
@@ -64,7 +76,7 @@ function SystemBuilderInner({ currentSystem, isNew, error: reduxError }) {
     []
   );
 
-  const handleRemovePage = (pageKey) => {
+  const handleRemovePage = (pageKey: string) => {
     setConfig((prev) => ({
       ...prev,
       pages: prev.pages.filter((p) => p.pageKey !== pageKey),
@@ -81,7 +93,7 @@ function SystemBuilderInner({ currentSystem, isNew, error: reduxError }) {
     }));
   };
 
-  const handlePermissionChange = (idx, field, value) => {
+  const handlePermissionChange = (idx: number, field: keyof PermissionConfigDto, value: any) => {
     setConfig((prev) => {
       const perms = [...prev.permissions];
       perms[idx] = { ...perms[idx], [field]: value };
@@ -89,14 +101,14 @@ function SystemBuilderInner({ currentSystem, isNew, error: reduxError }) {
     });
   };
 
-  const handleRemovePermission = (idx) => {
+  const handleRemovePermission = (idx: number) => {
     setConfig((prev) => ({
       ...prev,
       permissions: prev.permissions.filter((_, i) => i !== idx),
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaveError(null);
 
@@ -380,8 +392,8 @@ function SystemBuilderInner({ currentSystem, isNew, error: reduxError }) {
 export default function SystemBuilder() {
   const { systemKey } = useParams();
   const isNew = !systemKey;
-  const dispatch = useDispatch();
-  const { currentSystem, error } = useSelector((s) => s.systemConfig);
+  const dispatch = useAppDispatch();
+  const { currentSystem, error } = useAppSelector((s) => s.systemConfig);
 
   useEffect(() => {
     if (!isNew) {

@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Card, Row, Col, Button, Badge, Spinner, Alert } from 'react-bootstrap';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { fetchSystems, deleteSystem } from '../../store/systemConfigSlice';
 
 export default function SystemList() {
-  const dispatch = useDispatch();
-  const { systems, loading, error } = useSelector((state) => state.systemConfig);
+  const dispatch = useAppDispatch();
+  const { systems, loading, error } = useAppSelector((state) => state.systemConfig);
 
   useEffect(() => {
     dispatch(fetchSystems());

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Form, Button, Card, Row, Col } from 'react-bootstrap';
+import type { FieldConfigDto } from '../../types';
 
 const FIELD_TYPES = [
   'Text',
@@ -16,7 +17,7 @@ const FIELD_TYPES = [
   'MultiSelectAutocomplete',
 ];
 
-const EMPTY_FIELD = {
+const EMPTY_FIELD: FieldConfigDto = {
   fieldKey: '',
   label: '',
   labelAr: '',
@@ -42,11 +43,17 @@ const EMPTY_FIELD = {
   order: 0,
 };
 
-export default function FieldBuilder({ field, onSave, onCancel }) {
-  const isNew = !field;
-  const [config, setConfig] = useState(field || EMPTY_FIELD);
+interface FieldBuilderProps {
+  field: FieldConfigDto | null;
+  onSave: (field: FieldConfigDto) => void;
+  onCancel: () => void;
+}
 
-  const handleChange = (path, value) => {
+export default function FieldBuilder({ field, onSave, onCancel }: FieldBuilderProps) {
+  const isNew = !field;
+  const [config, setConfig] = useState<FieldConfigDto>(field || EMPTY_FIELD);
+
+  const handleChange = (path: string, value: any) => {
     setConfig((prev) => {
       const parts = path.split('.');
       if (parts.length === 1) {
@@ -64,21 +71,21 @@ export default function FieldBuilder({ field, onSave, onCancel }) {
   };
 
   // Simpler nested setter
-  const setValidation = (key, value) => {
+  const setValidation = (key: string, value: any) => {
     setConfig((prev) => ({
       ...prev,
       validation: { ...prev.validation, [key]: value },
     }));
   };
 
-  const setSliderConfig = (key, value) => {
+  const setSliderConfig = (key: string, value: any) => {
     setConfig((prev) => ({
       ...prev,
       sliderConfig: { ...(prev.sliderConfig || { min: 0, max: 100, step: 1 }), [key]: value },
     }));
   };
 
-  const setAutocompleteConfig = (key, value) => {
+  const setAutocompleteConfig = (key: string, value: any) => {
     setConfig((prev) => ({
       ...prev,
       autocompleteConfig: {
@@ -101,7 +108,7 @@ export default function FieldBuilder({ field, onSave, onCancel }) {
     }));
   };
 
-  const handleOptionChange = (idx, key, value) => {
+  const handleOptionChange = (idx: number, key: string, value: string) => {
     setConfig((prev) => {
       const options = [...(prev.options || [])];
       options[idx] = { ...options[idx], [key]: value };
@@ -109,14 +116,14 @@ export default function FieldBuilder({ field, onSave, onCancel }) {
     });
   };
 
-  const handleRemoveOption = (idx) => {
+  const handleRemoveOption = (idx: number) => {
     setConfig((prev) => ({
       ...prev,
       options: (prev.options || []).filter((_, i) => i !== idx),
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(config);
   };

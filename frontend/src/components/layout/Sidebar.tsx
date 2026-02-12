@@ -1,7 +1,12 @@
 import { Nav } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
+import type { SystemConfigurationSummaryDto } from '../../types';
 
-export default function Sidebar({ systems = [] }) {
+interface SidebarProps {
+  systems?: SystemConfigurationSummaryDto[];
+}
+
+export default function Sidebar({ systems = [] }: SidebarProps) {
   const location = useLocation();
 
   return (

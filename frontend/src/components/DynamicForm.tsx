@@ -1,8 +1,9 @@
 import { useState, useMemo } from 'react';
 import { Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import DynamicField from './fields/DynamicField';
+import type { FieldConfigDto, FormConfigDto } from '../types';
 
-function validateField(field, value) {
+function validateField(field: FieldConfigDto, value: any): string | null {
   const v = field.validation;
   if (!v) return null;
 
@@ -30,16 +31,24 @@ function validateField(field, value) {
   return null;
 }
 
+interface DynamicFormProps {
+  formConfig: FormConfigDto | null;
+  onSubmit?: (values: Record<string, any>) => void;
+  initialValues?: Record<string, any>;
+  isEdit?: boolean;
+  userId?: string;
+}
+
 export default function DynamicForm({
   formConfig,
   onSubmit,
   initialValues = {},
   isEdit = false,
   userId,
-}) {
-  const [values, setValues] = useState(initialValues);
-  const [errors, setErrors] = useState({});
-  const [submitError, setSubmitError] = useState(null);
+}: DynamicFormProps) {
+  const [values, setValues] = useState<Record<string, any>>(initialValues);
+  const [errors, setErrors] = useState<Record<string, string | null>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const visibleFields = useMemo(() => {
     if (!formConfig?.fields) return [];
@@ -51,16 +60,16 @@ export default function DynamicForm({
       .sort((a, b) => a.order - b.order);
   }, [formConfig, userId]);
 
-  const handleChange = (fieldKey, value) => {
+  const handleChange = (fieldKey: string, value: any) => {
     setValues((prev) => ({ ...prev, [fieldKey]: value }));
     setErrors((prev) => ({ ...prev, [fieldKey]: null }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
 
-    const newErrors = {};
+    const newErrors: Record<string, string | null> = {};
     visibleFields.forEach((field) => {
       const err = validateField(field, values[field.fieldKey]);
       if (err) newErrors[field.fieldKey] = err;

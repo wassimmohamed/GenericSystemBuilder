@@ -1,5 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { systemConfigApi } from '../api/systemConfigApi';
+import type {
+  SystemConfigurationSummaryDto,
+  SystemConfigurationResponseDto,
+  CreateSystemConfigurationDto,
+  UpdateSystemConfigurationDto,
+} from '../types';
+
+interface SystemConfigState {
+  systems: SystemConfigurationSummaryDto[];
+  currentSystem: SystemConfigurationResponseDto | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const initialState: SystemConfigState = {
+  systems: [],
+  currentSystem: null,
+  loading: false,
+  error: null,
+};
 
 export const fetchSystems = createAsyncThunk(
   'systemConfig/fetchSystems',
@@ -8,22 +28,23 @@ export const fetchSystems = createAsyncThunk(
 
 export const fetchSystemByKey = createAsyncThunk(
   'systemConfig/fetchSystemByKey',
-  async (key) => systemConfigApi.getByKey(key)
+  async (key: string) => systemConfigApi.getByKey(key)
 );
 
 export const createSystem = createAsyncThunk(
   'systemConfig/createSystem',
-  async (data) => systemConfigApi.create(data)
+  async (data: CreateSystemConfigurationDto) => systemConfigApi.create(data)
 );
 
 export const updateSystem = createAsyncThunk(
   'systemConfig/updateSystem',
-  async ({ key, data }) => systemConfigApi.update(key, data)
+  async ({ key, data }: { key: string; data: UpdateSystemConfigurationDto }) =>
+    systemConfigApi.update(key, data)
 );
 
 export const deleteSystem = createAsyncThunk(
   'systemConfig/deleteSystem',
-  async (key) => {
+  async (key: string) => {
     await systemConfigApi.delete(key);
     return key;
   }
@@ -31,12 +52,7 @@ export const deleteSystem = createAsyncThunk(
 
 const systemConfigSlice = createSlice({
   name: 'systemConfig',
-  initialState: {
-    systems: [],
-    currentSystem: null,
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {
     clearCurrentSystem: (state) => {
       state.currentSystem = null;
@@ -57,7 +73,7 @@ const systemConfigSlice = createSlice({
       })
       .addCase(fetchSystems.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error.message ?? null;
       })
       .addCase(fetchSystemByKey.pending, (state) => {
         state.loading = true;
@@ -69,19 +85,18 @@ const systemConfigSlice = createSlice({
       })
       .addCase(fetchSystemByKey.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error.message ?? null;
       })
       .addCase(createSystem.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(createSystem.fulfilled, (state, action) => {
+      .addCase(createSystem.fulfilled, (state) => {
         state.loading = false;
-        state.systems.push(action.payload);
       })
       .addCase(createSystem.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error.message ?? null;
       })
       .addCase(deleteSystem.pending, (state) => {
         state.loading = true;
@@ -95,7 +110,7 @@ const systemConfigSlice = createSlice({
       })
       .addCase(deleteSystem.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.error.message ?? null;
       });
   },
 });

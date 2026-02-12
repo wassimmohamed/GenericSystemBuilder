@@ -1,9 +1,9 @@
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../../store/hooks';
 import { Link } from 'react-router-dom';
 import { Card, Row, Col, Badge } from 'react-bootstrap';
 
 export default function Dashboard() {
-  const { systems, loading } = useSelector((state) => state.systemConfig);
+  const { systems, loading } = useAppSelector((state) => state.systemConfig);
 
   return (
     <div>

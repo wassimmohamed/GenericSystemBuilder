@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
 import { Tab, Tabs, Spinner, Alert, Button, Modal } from 'react-bootstrap';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { fetchSystemByKey } from '../../store/systemConfigSlice';
 import DynamicForm from '../../components/DynamicForm';
 import DynamicList from '../../components/DynamicList';
 
 export default function DynamicPage() {
   const { systemKey } = useParams();
-  const dispatch = useDispatch();
-  const { currentSystem, loading, error } = useSelector(
+  const dispatch = useAppDispatch();
+  const { currentSystem, loading, error } = useAppSelector(
     (state) => state.systemConfig
   );
   const [showForm, setShowForm] = useState(false);
-  const [editingItem, setEditingItem] = useState(null);
+  const [editingItem, setEditingItem] = useState<Record<string, any> | null>(null);
 
   // Simulated current user ID
   const userId = 'admin';
@@ -41,7 +41,7 @@ export default function DynamicPage() {
   const { configuration } = currentSystem;
   const pages = configuration?.pages || [];
 
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = (values: Record<string, any>) => {
     // In a real app, this would save data to the backend
     console.log('Form submitted:', values);
     setShowForm(false);
