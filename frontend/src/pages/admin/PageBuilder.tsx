@@ -217,7 +217,7 @@ export default function PageBuilder({ page, onSave, onCancel }: PageBuilderProps
               <p className="text-muted">No fields configured yet.</p>
             ) : (
               <ListGroup>
-                {(config.form?.fields || [])
+                {[...(config.form?.fields || [])]
                   .sort((a, b) => a.order - b.order)
                   .map((field) => (
                     <ListGroup.Item
