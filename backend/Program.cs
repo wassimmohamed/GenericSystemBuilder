@@ -44,17 +44,29 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddValidatorsFromAssemblyContaining<CreateSystemConfigurationValidator>();
 
 // Add CORS
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowFrontend", policy =>
+//    {
+//        policy.WithOrigins(
+//                builder.Configuration.GetValue<string>("Cors:FrontendUrl") ?? "http://localhost:5173"
+//            )
+//            .AllowAnyHeader()
+//            .AllowAnyMethod();
+//    });
+//});
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("OpenPolicy", policy =>
     {
-        policy.WithOrigins(
-                builder.Configuration.GetValue<string>("Cors:FrontendUrl") ?? "http://localhost:5173"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
+
 
 var app = builder.Build();
 
@@ -72,7 +84,7 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestCultureMiddleware>();
 
 app.UseHttpsRedirection();
-app.UseCors("AllowFrontend");
+app.UseCors("OpenPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();

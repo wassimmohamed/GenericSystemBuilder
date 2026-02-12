@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://localhost:5001';
 
 // Cache the browser timezone once at module load
 const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
