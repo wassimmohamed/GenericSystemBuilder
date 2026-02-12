@@ -1,4 +1,5 @@
 import { Form } from 'react-bootstrap';
+import AutocompleteField from './AutocompleteField';
 import type { FieldConfigDto } from '../../types';
 
 interface DynamicFieldProps {
@@ -136,25 +137,18 @@ export default function DynamicField({ field, value, onChange, isEdit = false, e
 
       case 'Autocomplete':
       case 'MultiSelectAutocomplete': {
-        const acOptions =
-          autocompleteConfig?.sourceType === 'Static'
-            ? autocompleteConfig?.staticOptions || []
-            : options || [];
-        const isMulti = fieldType === 'MultiSelectAutocomplete';
         return (
-          <Form.Select
-            multiple={isMulti}
-            value={isMulti ? value || [] : value || ''}
-            onChange={handleChange}
-            {...commonProps}
-          >
-            {!isMulti && <option value="">Select...</option>}
-            {acOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </Form.Select>
+          <AutocompleteField
+            fieldKey={fieldKey}
+            value={value}
+            onChange={onChange}
+            autocompleteConfig={autocompleteConfig}
+            staticOptions={options}
+            isMulti={fieldType === 'MultiSelectAutocomplete'}
+            disabled={!!isDisabled}
+            isInvalid={!!error}
+            placeholder={placeholder || 'Type to search...'}
+          />
         );
       }
 

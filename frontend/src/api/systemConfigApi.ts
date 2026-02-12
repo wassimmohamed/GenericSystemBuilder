@@ -59,6 +59,13 @@ export const dataEntryApi = {
       .get<DataEntryResponseDto[]>(`/api/data/${systemKey}/${pageKey}`)
       .then((r) => r.data),
 
+  getCollectionData: (systemKey: string, pageKey: string, collectionName: string) =>
+    apiClient
+      .get<Record<string, any>[]>(
+        `/api/data/${systemKey}/${pageKey}/collections/${collectionName}`
+      )
+      .then((r) => r.data),
+
   create: (systemKey: string, pageKey: string, data: CreateDataEntryDto) =>
     apiClient
       .post<DataEntryResponseDto>(`/api/data/${systemKey}/${pageKey}`, data)
