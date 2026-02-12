@@ -1,8 +1,17 @@
-import { Navbar as BsNavbar, Container, Nav } from 'react-bootstrap';
-import { Link, useLocation } from 'react-router-dom';
+import { Navbar as BsNavbar, Container, Nav, Button } from 'react-bootstrap';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../store/hooks';
+import { logout } from '../../store/authSlice';
 
 export default function Navbar() {
   const location = useLocation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/login');
+  };
 
   return (
     <BsNavbar bg="dark" variant="dark" expand="lg" className="mb-3">
@@ -29,6 +38,9 @@ export default function Navbar() {
               Admin
             </Nav.Link>
           </Nav>
+          <Button variant="outline-light" size="sm" onClick={handleLogout}>
+            Logout
+          </Button>
         </BsNavbar.Collapse>
       </Container>
     </BsNavbar>
