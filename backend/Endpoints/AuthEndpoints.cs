@@ -23,8 +23,10 @@ public static class AuthEndpoints
                 return Results.BadRequest(new { message = "Username and password are required" });
             }
 
-            // In production, validate against a user store
-            // For now, accept any non-empty credentials
+            // WARNING: Demo-only authentication - accepts any non-empty credentials.
+            // In production, validate against a secure user store with hashed passwords
+            // (e.g., ASP.NET Identity, database lookup with BCrypt/Argon2).
+            // Do NOT use this in production without proper credential validation.
             var jwtKey = config["Jwt:Key"]!;
             var issuer = config["Jwt:Issuer"]!;
             var audience = config["Jwt:Audience"]!;

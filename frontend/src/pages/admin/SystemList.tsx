@@ -12,7 +12,7 @@ export default function SystemList() {
     dispatch(fetchSystems());
   }, [dispatch]);
 
-  const handleDelete = (systemKey) => {
+  const handleDelete = (systemKey: string) => {
     if (window.confirm(`Delete system "${systemKey}"? This will deactivate all versions.`)) {
       dispatch(deleteSystem(systemKey));
     }

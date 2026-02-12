@@ -8,8 +8,8 @@ Built as a **monorepo** with a React frontend and .NET 8 backend, storing all co
 
 ```
 /root
-  /frontend   (React + Vite + Bootstrap + Redux Toolkit + React Router)
-  /backend    (.NET 8 Minimal API + EF Core + FluentValidation)
+  /frontend   (React + Vite + Bootstrap + Redux Toolkit + React Router + TypeScript + Axios)
+  /backend    (.NET 8 Minimal API + EF Core + FluentValidation + JWT Authentication)
 ```
 
 ### Backend Structure
@@ -18,24 +18,26 @@ Built as a **monorepo** with a React frontend and .NET 8 backend, storing all co
 /backend
   /Data                  → AppDbContext (EF Core + PostgreSQL)
   /DTOs                  → Request/Response DTOs
-  /Endpoints             → Minimal API endpoint definitions
+  /Endpoints             → Minimal API endpoint definitions (Auth + SystemConfig)
   /Mappings              → Entity ↔ DTO mapping extensions
+  /Middleware             → ExceptionHandling + RequestCulture middleware
   /Models                → SystemConfiguration entity + JSONB models
   /Validators            → FluentValidation validators
-  Program.cs             → Application entry point
+  Program.cs             → Application entry point with JWT + middleware pipeline
 ```
 
 ### Frontend Structure
 
 ```
 /frontend/src
-  /api                   → API service layer (systemConfigApi)
-  /store                 → Redux Toolkit store + slices
+  /api                   → Axios API client with interceptors + systemConfigApi
+  /store                 → Redux Toolkit store + typed slices + hooks
+  /types                 → TypeScript type definitions
   /components
     /layout              → AppLayout, Navbar, Sidebar
     /fields              → DynamicField (all field types)
-    DynamicForm.jsx      → Dynamic form renderer with validation
-    DynamicList.jsx      → Dynamic list/table renderer
+    DynamicForm.tsx      → Dynamic form renderer with validation
+    DynamicList.tsx      → Dynamic list/table renderer
   /pages
     /admin               → SystemList, SystemBuilder, PageBuilder, FieldBuilder
     /runtime             → Dashboard, DynamicPage
@@ -50,6 +52,11 @@ Built as a **monorepo** with a React frontend and .NET 8 backend, storing all co
 - **Permission System**: System-level, page-level (List/Create/Edit/Delete), and field-level (View/Edit) permissions
 - **Configuration Versioning**: Every update creates a new version; retrieve latest or historical versions
 - **Single-Table JSONB Storage**: All configurations stored in one PostgreSQL table
+- **JWT Authentication**: Bearer token authentication with configurable expiration
+- **Global Exception Handling**: Structured error responses via middleware
+- **Request Culture/Timezone**: Middleware reads `Accept-Language` and `X-Timezone` headers to set thread culture and client timezone
+- **TypeScript Frontend**: Fully typed React components, Redux store, and API layer
+- **Axios Interceptors**: Automatic JWT token, language, and timezone header injection on every request
 - **Lazy Loading**: Frontend routes use React.lazy for code splitting
 - **CORS Support**: Configurable cross-origin settings for frontend-backend communication
 
@@ -110,18 +117,36 @@ The backend will be available at `http://localhost:5000`
 
 #### Backend API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/system-configurations` | List all active systems (latest versions) |
-| GET | `/api/system-configurations/{systemKey}` | Get system by key (latest version) |
-| GET | `/api/system-configurations/{systemKey}/versions` | List all versions of a system |
-| GET | `/api/system-configurations/{systemKey}/versions/{version}` | Get specific version |
-| POST | `/api/system-configurations` | Create new system |
-| PUT | `/api/system-configurations/{systemKey}` | Update system (creates new version) |
-| DELETE | `/api/system-configurations/{systemKey}` | Soft-delete system |
-| GET | `/api/system-configurations/{systemKey}/pages/{pageKey}/collections/{name}` | Get export collection |
-| GET | `/api/system-configurations/user/{userId}/accessible` | Get user-accessible systems |
-| `/swagger` | Swagger UI documentation (development only) |
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/auth/login` | Authenticate and get JWT token | No |
+| GET | `/api/system-configurations` | List all active systems (latest versions) | Yes |
+| GET | `/api/system-configurations/{systemKey}` | Get system by key (latest version) | Yes |
+| GET | `/api/system-configurations/{systemKey}/versions` | List all versions of a system | Yes |
+| GET | `/api/system-configurations/{systemKey}/versions/{version}` | Get specific version | Yes |
+| POST | `/api/system-configurations` | Create new system | Yes |
+| PUT | `/api/system-configurations/{systemKey}` | Update system (creates new version) | Yes |
+| DELETE | `/api/system-configurations/{systemKey}` | Soft-delete system | Yes |
+| GET | `/api/system-configurations/{systemKey}/pages/{pageKey}/collections/{name}` | Get export collection | Yes |
+| GET | `/api/system-configurations/user/{userId}/accessible` | Get user-accessible systems | Yes |
+| | `/swagger` | Swagger UI documentation (development only) | No |
+
+#### Authentication
+
+The API uses JWT Bearer token authentication. To authenticate:
+
+1. Call `POST /api/auth/login` with `{ "username": "...", "password": "..." }`
+2. Include the returned token in subsequent requests: `Authorization: Bearer <token>`
+
+#### Request Headers
+
+The backend reads the following custom headers (sent automatically by the frontend via axios interceptors):
+
+| Header | Description | Example |
+|--------|-------------|---------|
+| `Authorization` | JWT Bearer token | `Bearer eyJhbGci...` |
+| `Accept-Language` | Client language for culture settings | `en-US`, `ar-SA` |
+| `X-Timezone` | Client timezone identifier | `America/New_York`, `Asia/Riyadh` |
 
 ## Development
 

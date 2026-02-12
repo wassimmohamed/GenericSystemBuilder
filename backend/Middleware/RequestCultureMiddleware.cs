@@ -42,7 +42,7 @@ public class RequestCultureMiddleware
             }
             catch (TimeZoneNotFoundException)
             {
-                // Try IANA to Windows mapping or ignore
+                // Invalid timezone identifier; ignore and keep default
                 context.Items["ClientTimeZone"] = null;
             }
         }

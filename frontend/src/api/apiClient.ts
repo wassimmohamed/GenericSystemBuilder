@@ -2,6 +2,9 @@ import axios from 'axios';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+// Cache the browser timezone once at module load
+const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
 const apiClient = axios.create({
   baseURL: API_BASE,
   headers: {
@@ -23,7 +26,7 @@ apiClient.interceptors.request.use(
     config.headers['Accept-Language'] = language;
 
     // Attach client timezone
-    const timezone = localStorage.getItem('timezone') || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const timezone = localStorage.getItem('timezone') || detectedTimezone;
     config.headers['X-Timezone'] = timezone;
 
     return config;
