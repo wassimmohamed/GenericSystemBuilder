@@ -66,8 +66,22 @@ export interface FormConfigDto {
   fields: FieldConfigDto[];
 }
 
+export interface ListColumnFieldDto {
+  fieldKey: string;
+  renderAs: string;
+  badgeVariant?: string;
+}
+
+export interface ListColumnConfigDto {
+  key: string;
+  header: string;
+  headerAr?: string;
+  fields: ListColumnFieldDto[];
+}
+
 export interface ListConfigDto {
   displayFields: string[];
+  columns?: ListColumnConfigDto[];
   enableSearch: boolean;
   enablePagination: boolean;
   pageSize: number;

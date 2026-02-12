@@ -117,11 +117,27 @@ public class CustomValidationRule
 public class ListConfig
 {
     public List<string> DisplayFields { get; set; } = new();
+    public List<ListColumnConfig> Columns { get; set; } = new();
     public bool EnableSearch { get; set; } = true;
     public bool EnablePagination { get; set; } = true;
     public int PageSize { get; set; } = 10;
     public string? DefaultSortField { get; set; }
     public string DefaultSortDirection { get; set; } = "asc";
+}
+
+public class ListColumnConfig
+{
+    public string Key { get; set; } = string.Empty;
+    public string Header { get; set; } = string.Empty;
+    public string? HeaderAr { get; set; }
+    public List<ListColumnField> Fields { get; set; } = new();
+}
+
+public class ListColumnField
+{
+    public string FieldKey { get; set; } = string.Empty;
+    public string RenderAs { get; set; } = "text";
+    public string? BadgeVariant { get; set; }
 }
 
 public class ExportCollection
