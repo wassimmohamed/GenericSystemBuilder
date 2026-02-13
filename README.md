@@ -1,14 +1,64 @@
 # GenericSystemBuilder
 
-A monorepo containing a React + Vite frontend and a .NET 8 Minimal API backend.
+A **Generic System Builder Platform** where admin users can dynamically configure systems, pages, forms, fields, permissions, and validations — and end users interact with dynamically rendered UIs based on those configurations.
+
+Built as a **monorepo** with a React frontend and .NET 8 backend, storing all configuration in a single PostgreSQL table using JSONB with versioning.
 
 ## Project Structure
 
 ```
 /root
-  /frontend   (React + Vite)
-  /backend    (.NET 8 Minimal API)
+  /frontend   (React + Vite + Bootstrap + Redux Toolkit + React Router + TypeScript + Axios)
+  /backend    (.NET 8 Minimal API + EF Core + FluentValidation + JWT Authentication)
 ```
+
+### Backend Structure
+
+```
+/backend
+  /Data                  → AppDbContext (EF Core + PostgreSQL)
+  /DTOs                  → Request/Response DTOs
+  /Endpoints             → Minimal API endpoint definitions (Auth + SystemConfig)
+  /Mappings              → Entity ↔ DTO mapping extensions
+  /Middleware             → ExceptionHandling + RequestCulture middleware
+  /Models                → SystemConfiguration entity + JSONB models
+  /Validators            → FluentValidation validators
+  Program.cs             → Application entry point with JWT + middleware pipeline
+```
+
+### Frontend Structure
+
+```
+/frontend/src
+  /api                   → Axios API client with interceptors + systemConfigApi
+  /store                 → Redux Toolkit store + typed slices + hooks
+  /types                 → TypeScript type definitions
+  /components
+    /layout              → AppLayout, Navbar, Sidebar
+    /fields              → DynamicField (all field types)
+    DynamicForm.tsx      → Dynamic form renderer with validation
+    DynamicList.tsx      → Dynamic list/table renderer
+  /pages
+    /admin               → SystemList, SystemBuilder, PageBuilder, FieldBuilder
+    /runtime             → Dashboard, DynamicPage
+```
+
+## Features
+
+- **Dynamic System Configuration**: Create/edit systems with pages, forms, fields, and permissions
+- **12 Field Types**: Text, Password, Number, Date, DateTime, TextArea, Slider, Radio, Checkbox, MultiSelect, Autocomplete, MultiSelectAutocomplete
+- **Dynamic Validation**: Required, min/max length, range, unique, regex, disabled-on-edit, custom rules — enforced on both frontend and backend
+- **Export Collections**: Reusable field collections that can be referenced by autocomplete fields across pages
+- **Permission System**: System-level, page-level (List/Create/Edit/Delete), and field-level (View/Edit) permissions
+- **Configuration Versioning**: Every update creates a new version; retrieve latest or historical versions
+- **Single-Table JSONB Storage**: All configurations stored in one PostgreSQL table
+- **JWT Authentication**: Bearer token authentication with configurable expiration
+- **Global Exception Handling**: Structured error responses via middleware
+- **Request Culture/Timezone**: Middleware reads `Accept-Language` and `X-Timezone` headers to set thread culture and client timezone
+- **TypeScript Frontend**: Fully typed React components, Redux store, and API layer
+- **Axios Interceptors**: Automatic JWT token, language, and timezone header injection on every request
+- **Lazy Loading**: Frontend routes use React.lazy for code splitting
+- **CORS Support**: Configurable cross-origin settings for frontend-backend communication
 
 ## Getting Started
 
@@ -16,11 +66,30 @@ A monorepo containing a React + Vite frontend and a .NET 8 Minimal API backend.
 
 - Node.js (v18 or higher)
 - .NET 8 SDK
-- npm or yarn
+- PostgreSQL
+- npm
+
+### Database Setup
+
+Create a PostgreSQL database:
+
+```sql
+CREATE DATABASE generic_system_builder;
+```
+
+Update the connection string in `backend/appsettings.json`:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5432;Database=generic_system_builder;Username=postgres;Password=postgres"
+  }
+}
+```
+
+The database table is auto-created on first run in development mode.
 
 ### Frontend (React + Vite)
-
-The frontend is built with React and Vite for fast development and optimized production builds.
 
 ```bash
 cd frontend
@@ -39,25 +108,49 @@ The frontend will be available at `http://localhost:5173`
 
 ### Backend (.NET 8 Minimal API)
 
-The backend is a minimal API built with .NET 8, featuring Swagger documentation.
-
 ```bash
 cd backend
 dotnet run
 ```
 
-The backend will be available at `http://localhost:5000` (or `https://localhost:5001`)
+The backend will be available at `http://localhost:5000`
 
-#### Backend Endpoints
+#### Backend API Endpoints
 
-- `GET /weatherforecast` - Sample weather forecast endpoint
-- `/swagger` - Swagger UI documentation (development only)
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/api/auth/login` | Authenticate and get JWT token | No |
+| GET | `/api/system-configurations` | List all active systems (latest versions) | Yes |
+| GET | `/api/system-configurations/{systemKey}` | Get system by key (latest version) | Yes |
+| GET | `/api/system-configurations/{systemKey}/versions` | List all versions of a system | Yes |
+| GET | `/api/system-configurations/{systemKey}/versions/{version}` | Get specific version | Yes |
+| POST | `/api/system-configurations` | Create new system | Yes |
+| PUT | `/api/system-configurations/{systemKey}` | Update system (creates new version) | Yes |
+| DELETE | `/api/system-configurations/{systemKey}` | Soft-delete system | Yes |
+| GET | `/api/system-configurations/{systemKey}/pages/{pageKey}/collections/{name}` | Get export collection | Yes |
+| GET | `/api/system-configurations/user/{userId}/accessible` | Get user-accessible systems | Yes |
+| | `/swagger` | Swagger UI documentation (development only) | No |
+
+#### Authentication
+
+The API uses JWT Bearer token authentication. To authenticate:
+
+1. Call `POST /api/auth/login` with `{ "username": "...", "password": "..." }`
+2. Include the returned token in subsequent requests: `Authorization: Bearer <token>`
+
+#### Request Headers
+
+The backend reads the following custom headers (sent automatically by the frontend via axios interceptors):
+
+| Header | Description | Example |
+|--------|-------------|---------|
+| `Authorization` | JWT Bearer token | `Bearer eyJhbGci...` |
+| `Accept-Language` | Client language for culture settings | `en-US`, `ar-SA` |
+| `X-Timezone` | Client timezone identifier | `America/New_York`, `Asia/Riyadh` |
 
 ## Development
 
 ### Running Both Applications
-
-You can run both the frontend and backend simultaneously in separate terminal windows:
 
 Terminal 1 (Frontend):
 ```bash
