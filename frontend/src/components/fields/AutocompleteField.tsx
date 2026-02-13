@@ -34,7 +34,7 @@ export default function AutocompleteField({
   const [search, setSearch] = useState('');
   const [remoteOptions, setRemoteOptions] = useState<OptionItem[]>([]);
   const [loading, setLoading] = useState(
-    () => autocompleteConfig?.sourceType === 'ExportCollection' && !!autocompleteConfig.collectionRef
+    () => (autocompleteConfig?.sourceType === 'ExportCollection' || autocompleteConfig?.sourceType === 'Collection') && !!autocompleteConfig.collectionRef
   );
   const [showDropdown, setShowDropdown] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -51,9 +51,9 @@ export default function AutocompleteField({
   }, [autocompleteConfig, staticOptions]);
 
   const isExportCollection =
-    autocompleteConfig?.sourceType === 'ExportCollection' && !!autocompleteConfig.collectionRef;
+    (autocompleteConfig?.sourceType === 'ExportCollection' || autocompleteConfig?.sourceType === 'Collection') && !!autocompleteConfig.collectionRef;
 
-  // Load collection data asynchronously when sourceType is ExportCollection
+  // Load collection data asynchronously when sourceType is ExportCollection or Collection
   useEffect(() => {
     if (!isExportCollection || !autocompleteConfig?.collectionRef) return;
     const parts = autocompleteConfig.collectionRef.split('.');

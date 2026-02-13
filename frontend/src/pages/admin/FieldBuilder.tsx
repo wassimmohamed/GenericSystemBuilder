@@ -470,11 +470,11 @@ export default function FieldBuilder({ field, onSave, onCancel }: FieldBuilderPr
                       }
                     >
                       <option value="Static">Static</option>
-                      <option value="Collection">Collection Reference</option>
+                      <option value="ExportCollection">Collection Reference</option>
                     </Form.Select>
                   </Form.Group>
                 </Col>
-                {config.autocompleteConfig?.sourceType === 'Collection' && (
+                {(config.autocompleteConfig?.sourceType === 'ExportCollection' || config.autocompleteConfig?.sourceType === 'Collection') && (
                   <>
                     <Col md={4}>
                       <Form.Group className="mb-3">
